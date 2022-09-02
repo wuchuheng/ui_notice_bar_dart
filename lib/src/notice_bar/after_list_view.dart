@@ -4,8 +4,14 @@ import 'package:flutter/scheduler.dart';
 class AfterListView extends StatefulWidget {
   final String text;
   final Function(double width) callback;
+  final double width;
 
-  const AfterListView({Key? key, required this.text, required this.callback}) : super(key: key);
+  const AfterListView(
+      {Key? key,
+      required this.text,
+      required this.callback,
+      required this.width})
+      : super(key: key);
 
   @override
   State<AfterListView> createState() => _AfterListViewState();
@@ -33,20 +39,22 @@ class _AfterListViewState extends State<AfterListView> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constrain) {
-      final min = constrain.minWidth;
-      return Container(
-        width: min,
-        child: ListView(
-          controller: _controller,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          scrollDirection: Axis.horizontal,
-          children: [
-            ...widget.text.split('').map((e) => Text(e)).toList(),
-          ],
-        ),
-      );
-    });
+    return LayoutBuilder(
+      builder: (context, constrain) {
+        final min = constrain.minWidth;
+        return Container(
+          width: min,
+          child: ListView(
+            controller: _controller,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            scrollDirection: Axis.horizontal,
+            children: [
+              ...widget.text.split('').map((e) => Text(e)).toList(),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

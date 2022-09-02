@@ -5,14 +5,25 @@ class AnimationSection extends StatefulWidget {
   final double width;
   final double listViewWidth;
   final String text;
-  const AnimationSection({Key? key, required this.width, required this.listViewWidth, required this.text})
-      : super(key: key);
+  final Icon? icon;
+  final Color textColor;
+  final Color iconColor;
+  const AnimationSection({
+    Key? key,
+    required this.width,
+    required this.listViewWidth,
+    required this.text,
+    this.icon,
+    required this.textColor,
+    required this.iconColor,
+  }) : super(key: key);
 
   @override
   State<AnimationSection> createState() => _AnimationSectionState();
 }
 
-class _AnimationSectionState extends State<AnimationSection> with SingleTickerProviderStateMixin {
+class _AnimationSectionState extends State<AnimationSection>
+    with SingleTickerProviderStateMixin {
   late AnimationController animationController;
   late Animation animation;
 
@@ -42,9 +53,11 @@ class _AnimationSectionState extends State<AnimationSection> with SingleTickerPr
     super.initState();
   }
 
+  bool isAnimation = false;
   void startAnimation() {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      if (scrollController.hasClients && mounted) {
+      if (scrollController.hasClients && mounted && !isAnimation) {
+        isAnimation = true;
         animationController.forward(from: -widget.width);
       }
     });
@@ -59,24 +72,55 @@ class _AnimationSectionState extends State<AnimationSection> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, child) {
-        if (scrollController.hasClients) {
-          print(animation.value);
-          scrollController.jumpTo(animation.value);
-        }
-
-        return ListView(
-          controller: scrollController,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          scrollDirection: Axis.horizontal,
-          children: [
-            ...widget.text.split('').map((e) => Text(e)).toList(),
-          ],
+    final double iconWidth = 30;
+    final width = widget.width - iconWidth;
+    final icon = widget.icon ??
+        Icon(
+          Icons.campaign,
+          color: widget.iconColor,
+          size: 18,
         );
-      },
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(width: iconWidth, child: icon),
+        Container(
+          width: width,
+          child: Container(
+            child: AnimatedBuilder(
+              animation: animation,
+              builder: (BuildContext context, child) {
+                if (scrollController.hasClients) {
+                  scrollController.jumpTo(animation.value);
+                }
+                return ListView(
+                  controller: scrollController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    ...widget.text
+                        .split('')
+                        .map(
+                          (e) => Container(
+                              child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(e,
+                                  style: TextStyle(color: widget.textColor)),
+                            ],
+                          )
+                              // Text(e)
+                              ),
+                        )
+                        .toList(),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
